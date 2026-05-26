@@ -1,0 +1,53 @@
+{
+  "stt": {
+    "model": "tiny",
+    "language": "en",
+    "recording": {
+      "sample_rate": 44100,
+      "silence_threshold": 0.5,
+      "silence_duration": 1.0,
+      "min_record_time": 2.0
+    },
+    "channels": 1,
+    "blocksize": 1024,
+    "device_index": 1,
+    "start_threshold": 0.01
+  },
+
+  "tts": {
+    "voice": "default",
+    "speed": 1.0
+  },
+
+  "llm": {
+    "character_name": "Peppa Pig",
+    "model": "Llama-3.2-1B-Instruct-NEO-SI-FI-IQ2_M-imat.gguf",
+    "n_gpu_layers": -1,
+    "low_vram": false,
+    "max_tokens": 60,
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "stop": null
+  },
+
+  "chunk audio": {
+    "chunk_duration": 5.0,
+    "min_chunk_duration": 2.0,
+
+    "padding": {
+      "enabled": true,
+      "start": 0.5,
+      "end": 0.5
+    }
+  },
+
+  "diarization": {
+    "max_silence_ms": 500,
+    "diarization": true,
+    "punctuate": true
+  },
+
+  "dataset": {
+    "cache_run": true
+  }
+}

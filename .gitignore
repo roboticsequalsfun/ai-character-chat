@@ -1,0 +1,22 @@
+# Virtual environment
+venv/
+
+# Models
+models/
+*.gguf
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Build/package metadata
+*.egg-info/
+
+# Data
+data/**
+
+# External repos
+external/llama.cpp/
+
+# Optional: cloned llama-cpp-python repo
+external/llama-cpp-python/

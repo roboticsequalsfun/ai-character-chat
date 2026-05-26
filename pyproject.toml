@@ -1,0 +1,17 @@
+[project]
+name = "ai_chat_project"
+version = "0.1.0"
+
+dependencies = [
+   "deepgram-sdk",
+   "whisper",
+   "pydub",
+   "tdqm",
+   "sounddevice",
+   "pathlib",
+   "librosa"
+]
+
+[tool.setuptools.packages.find]
+# Explicitly list the packages you want to include
+include = ["data*", "shared*", "ai_core*", "train_data_processing*"]
