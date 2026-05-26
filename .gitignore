@@ -1,6 +1,9 @@
 # Virtual environment
 venv/
 
+# IDE files
+*.code-workspace
+
 # Models
 models/
 *.gguf
