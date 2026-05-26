@@ -1,6 +1,3 @@
-# PeppaVoice_train.py
-# Run: .venv\Scripts\python.exe PeppaVoice_train.py
-
 import os
 from trainer import Trainer, TrainerArgs
 from TTS.tts.configs.vits_config import VitsConfig

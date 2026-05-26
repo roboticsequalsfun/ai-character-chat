@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
-from shared.paths import CHUNKS_DIR, DATASET_WAV_DIR, TRANSCRIPT_DIR, TEMP_DIR, SEPARATED_DIR, RUN_DIR, DATASET_DIR, CONFIG_PATH
-from shared.file_utils import ensure_dir, load_json, write_file, load_file, list_files_in_directory, load_config
+from character_chat.shared.paths import CHUNKS_DIR, DATASET_WAV_DIR, TRANSCRIPT_DIR, TEMP_DIR, SEPARATED_DIR, RUN_DIR, DATASET_DIR, CONFIG_PATH
+from character_chat.shared.file_utils import ensure_dir, load_json, write_file, load_file, list_files_in_directory, load_config
 
 def build_dataset_for_speaker(speaker_metadata, word_timings, speaker_name):
         for i, chunk in enumerate(speaker_metadata):

@@ -1,9 +1,7 @@
 from llama_cpp import Llama
-import time
-import os
 from pathlib import Path
-from shared.paths import LLM_MODELS_DIR, TRANSCRIPT_DIR, PROMPT_DIR
-from shared.file_utils import load_config
+from character_chat.shared.paths import LLM_MODELS_DIR, TRANSCRIPT_DIR, PROMPT_DIR
+from character_chat.shared.file_utils import load_config
 
 class LLM:
     def __init__(self, model, n_gpu_layers=-1, low_vram=False):

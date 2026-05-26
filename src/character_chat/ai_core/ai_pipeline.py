@@ -1,6 +1,6 @@
-from ai_core.llm.llm import LLM
-from shared.file_utils import load_config
-from shared.paths import PROMPT_DIR, TRANSCRIPT_DIR
+from character_chat.ai_core.llm.llm import LLM
+from character_chat.shared.file_utils import load_config
+from character_chat.shared.paths import PROMPT_DIR, TRANSCRIPT_DIR
 
 class AIPipeline:
     def __init__(self):
@@ -53,3 +53,6 @@ class AIPipeline:
 def main():
     pipeline = AIPipeline()
     pipeline.setup()
+
+if __name__ == "__main__":
+    main()

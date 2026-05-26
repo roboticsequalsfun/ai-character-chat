@@ -1,12 +1,11 @@
 import time
 import os
-import json
 from deepgram import DeepgramClient
 import whisper
 from pydub import AudioSegment
-from shared.paths import TEMP_DIR, INPUT_AUDIO_DIR, SEPARATED_DIR
-from shared.file_utils import load_config, write_json
-from shared.audio_io import load_audio_pydub, write_audio
+from character_chat.shared.paths import TEMP_DIR, INPUT_AUDIO_DIR, SEPARATED_DIR
+from character_chat.shared.file_utils import load_config, write_json
+from character_chat.shared.audio_io import load_audio_pydub, write_audio
 
 def configure():
     # Initialize Deepgram client

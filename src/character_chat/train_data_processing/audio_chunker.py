@@ -1,8 +1,8 @@
 from pathlib import Path
 import time
-from shared.paths import CHUNKS_DIR, SEPARATED_DIR, TEMP_DIR
-from shared.audio_io import load_audio_librosa, write_audio
-from shared.file_utils import ensure_dir, write_json, load_json, list_files_in_directory, load_config
+from character_chat.shared.paths import CHUNKS_DIR, SEPARATED_DIR, TEMP_DIR
+from character_chat.shared.audio_io import load_audio_librosa, write_audio
+from character_chat.shared.file_utils import ensure_dir, write_json, load_json, list_files_in_directory, load_config
 import numpy as np
 import soundfile as sf
 
