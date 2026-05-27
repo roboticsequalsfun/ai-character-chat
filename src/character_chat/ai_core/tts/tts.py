@@ -1,9 +1,7 @@
 import os
-import time
 import torchaudio as ta
 from chatterbox.tts import ChatterboxTTS
 from character_chat.shared.paths import OUTPUT_AUDIO_DIR, DATASET_WAV_DIR
-import sys
 
 class TTS:
     def __init__(self):

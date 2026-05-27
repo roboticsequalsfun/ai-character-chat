@@ -62,4 +62,6 @@ if __name__ == "__main__":
 
     while True:
         text = input("You: ")
+        if text.lower() == "exit":
+            break
         print(llm.respond(config["character_name"], text, base_prompt=config["prompt"], max_tokens=config["max_tokens"], temperature=config["temperature"], top_p=config["top_p"], stop=config["stop"]))
