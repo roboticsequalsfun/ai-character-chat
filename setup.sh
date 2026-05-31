@@ -2,6 +2,8 @@
 
 sudo apt update
 sudo apt install python3.12-venv
+sudo apt install -y libasound2-dev
+sudo apt install python3-dev build-essential
 
 python3 -m venv venv
 source venv/bin/activate

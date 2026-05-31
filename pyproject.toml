@@ -6,15 +6,19 @@ dependencies = [
    "deepgram-sdk",
    "whisper",
    "pydub",
-   "tdqm",
+   "tqdm",
    "sounddevice",
-   "pathlib",
    "librosa",
    "simpleaudio",
-   "llama_cpp",
+   "llama-cpp-python",
+    "torch",
+    "torchaudio",
    "wavio"
 ]
 
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
-# Explicitly list the packages you want to include
-include = ["data*", "shared*", "ai_core*", "train_data_processing*"]
+where = ["src"]
+include = ["character_chat*"]

@@ -1,6 +1,6 @@
 from pathlib import Path
 import json
-from shared.paths import CONFIG_PATH
+from character_chat.shared.paths import CONFIG_PATH
 
 def ensure_dir(path):
     path.mkdir(parents=True, exist_ok=True)

@@ -2,6 +2,7 @@ import os
 import queue
 import sounddevice as sd
 from character_chat.shared.file_utils import load_config
+from character_chat.shared.paths import INPUT_AUDIO_DIR
 import numpy as np
 import wavio
 
@@ -14,10 +15,11 @@ class AudioRecorder:
         self.silence_duration = silence_duration
         self.min_record_time = min_record_time
         self.channel = channel
+        self.audio_path = INPUT_AUDIO_DIR / "recorded.wav"
         self.audio_queue = queue.Queue()
         self.stream = sd.InputStream(
             samplerate=self.sample_rate,
-            device=self.device_index,
+            # device=self.device_index,
             channels=self.channel,
             blocksize=self.block_size,
             callback=self.callback
@@ -70,7 +72,7 @@ class AudioRecorder:
         self.stop()
         
         audio = np.concatenate(recording, axis=0)
-        wavio.write("recorded_audio.wav", audio, self.sample_rate, sampwidth=3)
+        wavio.write(self.audio_path, audio, self.sample_rate, sampwidth=3)
 
 def main():
     config = load_config()
