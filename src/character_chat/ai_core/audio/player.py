@@ -1,24 +1,40 @@
-import torchaudio as ta
-import simpleaudio as sa
-from character_chat.shared.paths import OUTPUT_AUDIO_DIR
+import argparse
+import sounddevice as sd
+import soundfile as sf
+from character_chat.shared.paths import INPUT_AUDIO_DIR, OUTPUT_AUDIO_DIR, PROJECT_DIR
 from pathlib import Path
-import torch
 
 class AudioPlayer:
-    def __init__(self, audio_path=None):
-        self.audio_path = OUTPUT_AUDIO_DIR / "output.wav" if audio_path is None else Path(audio_path)
-
-    def play(self):
+    def play(self, audio_path=OUTPUT_AUDIO_DIR / "output.wav"):
         # Load waveform and sample rate
-        waveform, sr = ta.load(self.audio_path)  # waveform: [channels, samples], float32 [-1.0,1.0]
+        data, fs = sf.read(audio_path)  # waveform: [samples, channels], float32 [-1.0,1.0]
 
-        # Convert to PCM16 for simpleaudio
-        pcm16 = (waveform * 32767).to(torch.int16).T  # transpose to [samples, channels]
+        sd.play(data, fs)
+        sd.wait()
 
-        # Interleave and convert to bytes
-        audio_bytes = pcm16.contiguous().numpy().tobytes()
+def main():
+    parser = argparse.ArgumentParser(description="Audio player for playing generated responses")
 
-        # Play audio
-        wave_obj = sa.WaveObject(audio_bytes, num_channels=pcm16.shape[1], bytes_per_sample=2, sample_rate=sr)
-        play_obj = wave_obj.play()
-        play_obj.wait_done()
+    parser.add_argument(
+        "--file",
+        type=str,
+        help="Path to audio file for playback"
+    )
+
+    args = parser.parse_args()
+    file_path = (PROJECT_DIR / args.file).resolve()
+
+    player = AudioPlayer()
+
+    if args.file:
+        player.play(audio_path=str(file_path))
+        return
+
+    while True:
+        user_input = input("Enter path to audio file for playback: ")
+        if user_input.lower() == "exit":
+            break
+        player.play(audio_path=str((INPUT_AUDIO_DIR / user_input).resolve()))
+
+if __name__ == "__main__":
+    main()

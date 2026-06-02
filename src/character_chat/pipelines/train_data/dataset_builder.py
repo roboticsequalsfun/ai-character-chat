@@ -2,6 +2,7 @@ import shutil
 from pathlib import Path
 from character_chat.shared.paths import CHUNKS_DIR, DATASET_WAV_DIR, TRANSCRIPT_DIR, TEMP_DIR, SEPARATED_DIR, RUN_DIR, DATASET_DIR, CONFIG_PATH
 from character_chat.shared.file_utils import ensure_dir, load_json, write_file, load_file, list_files_in_directory, load_config
+from character_chat.shared.logger import log
 
 def build_dataset_for_speaker(speaker_metadata, word_timings, speaker_name):
         for i, chunk in enumerate(speaker_metadata):
@@ -22,7 +23,7 @@ def build_dataset_for_speaker(speaker_metadata, word_timings, speaker_name):
             dst = DATASET_WAV_DIR / speaker_name / f"chunk_{i:04d}.wav"
             shutil.copy2(src, dst)
 
-            print(f"Created dataset entry for {i:04d} with {len(chunk_words)} words.")
+            log(f"Created dataset entry for {i:04d} with {len(chunk_words)} words.", "INFO")
 
 def cache_run(path, prefix="run"):
     # To an array of all folders in the directory
@@ -61,33 +62,32 @@ def move_files(src_dir, dst_dir):
 
     for item in src_dir.iterdir():
         if item.is_file():
-            shutil.move(str(item), str(dst_dir / item.name))
+                shutil.move(str(item), str(dst_dir / item.name))
 
 def create_metadata_for_speaker(speaker_id):
-    print(f"[INFO] Creating metadata file for {speaker_id}")
+    log(f"[INFO] Creating metadata file for {speaker_id}", "INFO")
     files = list_files_in_directory(TRANSCRIPT_DIR / speaker_id)
-    metadata = DATASET_DIR / f"metadata_speaker{speaker_id}.txt"
-    wav_dir = DATASET_WAV_DIR / speaker_id
+    metadata = DATASET_DIR / f"metadata_{speaker_id}.csv"
     lines = []
 
     for i, file in enumerate(files):
         txt_contents = load_file(file)
-        wav_path = wav_dir / f"chunk_{i:04d}.wav"
-        relative_path = wav_path.relative_to(DATASET_DIR)
-        lines.append(f"{relative_path.as_posix()} | {txt_contents}")
+        wav_filename = f"chunk_{i:04d}"
+        relative_path = Path(f"{speaker_id}/{wav_filename}")
+        normalized = txt_contents.lower().strip()
+        lines.append(f"{relative_path}|{txt_contents}|{normalized}")
     write_file(metadata, "\n".join(lines))
 
 
-
 def main():
-    print("===================================")
-    print("Starting dataset building...")
-    print("===================================")
-    
+    log("===================================", "INFO")
+    log("Starting dataset building...", "INFO")
+    log("===================================", "INFO")
+
     speaker_folders = [f for f in CHUNKS_DIR.iterdir() if f.is_dir()]
 
     config = load_config()
-    cache = config.get("dataset", {}).get("cache_run")
+    cache = config.get("dataset_builder", {}).get("cache_run")
 
     for speaker_folder in speaker_folders:
         speaker_name = speaker_folder.name
@@ -100,13 +100,13 @@ def main():
         word_timings = load_json(word_timings_path)
         chunks_metadata = load_json(metadata_path)
 
-        print(f"[INFO] Building dataset entries for {speaker_folder}...")
+        log(f"[INFO] Building dataset entries for {speaker_folder}...", "INFO")
 
         build_dataset_for_speaker(chunks_metadata, word_timings, speaker_name)
         create_metadata_for_speaker(speaker_name)
     if cache:
         cache_run(RUN_DIR)
-    print("Dataset building complete. Final dataset is ready for training!")
+    log("Dataset building complete. Final dataset is ready for training!", "INFO")
 
 if __name__ == "__main__":
     main()

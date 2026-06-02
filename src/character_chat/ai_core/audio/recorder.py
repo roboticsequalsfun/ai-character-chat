@@ -1,13 +1,12 @@
-import os
 import queue
 import sounddevice as sd
+import soundfile as sf
 from character_chat.shared.file_utils import load_config
 from character_chat.shared.paths import INPUT_AUDIO_DIR
 import numpy as np
-import wavio
 
 class AudioRecorder:
-    def __init__(self, sample_rate=16000, block_size=1024, device_index=None, silence_threshold=0.5, silence_duration=0.01, min_record_time=2.0, channel=1):
+    def __init__(self, sample_rate=16000, block_size=1024, device_index=None, silence_threshold=0.02, silence_duration=1.0, min_record_time=2.0, channel=1, output_path=INPUT_AUDIO_DIR / "recorded.wav"):
         self.sample_rate = sample_rate
         self.block_size = block_size
         self.device_index = device_index
@@ -15,7 +14,7 @@ class AudioRecorder:
         self.silence_duration = silence_duration
         self.min_record_time = min_record_time
         self.channel = channel
-        self.audio_path = INPUT_AUDIO_DIR / "recorded.wav"
+        self.audio_path = output_path
         self.audio_queue = queue.Queue()
         self.stream = sd.InputStream(
             samplerate=self.sample_rate,
@@ -41,7 +40,7 @@ class AudioRecorder:
 
     def get_chunk(self):
         return self.audio_queue.get()
-    
+
     def record(self):
         self.start()
 
@@ -53,11 +52,12 @@ class AudioRecorder:
         while True:
             chunk = self.get_chunk()
             chunk_energy = np.sqrt(np.mean(chunk**2))
+
             if not recording_started:
                 if chunk_energy > self.silence_threshold:
                     recording_started = True
-                    recording.append(chunk)
-                continue
+                else:
+                    continue
             
             recording.append(chunk)
 
@@ -67,12 +67,18 @@ class AudioRecorder:
                 silence_time = 0
 
             if silence_time >= self.silence_duration:
-                break
+                recorded_time = len(recording) * block_duration
+                if silence_time >= self.silence_duration:
+                    if recorded_time < self.min_record_time:
+                        continue
+                    break
+        
+        print("Chunks collected:", len(recording))
+        print("First chunk shape:", recording[0].shape if recording else None)
 
         self.stop()
-        
         audio = np.concatenate(recording, axis=0)
-        wavio.write(self.audio_path, audio, self.sample_rate, sampwidth=3)
+        sf.write(str(self.audio_path), audio, self.sample_rate, subtype='PCM_16')
 
 def main():
     config = load_config()

@@ -1,34 +1,68 @@
-import os
-import torchaudio as ta
-from chatterbox.tts import ChatterboxTTS
-from character_chat.shared.paths import OUTPUT_AUDIO_DIR, DATASET_WAV_DIR
+import torch
+import argparse
+import soundfile as sf
+from pathlib import Path
+from character_chat.shared.paths import MODELS_DIR, OUTPUT_AUDIO_DIR
+from TTS.utils.audio import AudioProcessor
+from TTS.tts.models.glow_tts import GlowTTS
+from TTS.tts.utils.text.tokenizer import TTSTokenizer
+from TTS.tts.configs.glow_tts_config import GlowTTSConfig
 
 class TTS:
-    def __init__(self):
-        self.cb = ChatterboxTTS.from_pretrained(device="cpu")  # CPU mode
+    def __init__(self, model_path=None):
+        if model_path is None:
+            model_path = MODELS_DIR / "tts" / "glow_tts_speaker_0"
+        self.model_path = model_path
+        # Load config
+        config = GlowTTSConfig()
+        config.load_json(self.model_path / "config.json")
+        self.config = config
 
-    def run(self, text_to_speak):
-        audio_prompt_path = None
-        for file_name in sorted(os.listdir(DATASET_WAV_DIR)):
-            file_path = os.path.join(DATASET_WAV_DIR, file_name)
-            if file_name.lower().endswith((".wav", ".mp3")) and os.path.getsize(file_path) > 0:
-                try:
-                    # Test loading to catch corrupted files
-                    ta.load(file_path)
-                    audio_prompt_path = file_path
-                    print(f"[INFO] Using {file_name} as audio prompt")
-                    break
-                except Exception as e:
-                    print(f"[WARN] Skipping corrupted audio file: {file_name} ({e})")
+        # Audio processor
+        self.ap = AudioProcessor.init_from_config(self.config)
 
-        if not audio_prompt_path:
-            raise RuntimeError("No valid audio prompt found in folder!")
-        # Generate speech
-        print("[INFO] Generating speech...")
-        wav = self.cb.generate(text_to_speak, audio_prompt_path=audio_prompt_path)
+        # Tokenizer
+        self.tokenizer, self.config = TTSTokenizer.init_from_config(self.config)
 
-        # Convert directly to tensor for torchaudio
-        wav_tensor = wav.cpu()  # wav is already a torch.Tensor
-        ta.save(OUTPUT_AUDIO_DIR, wav_tensor, self.cb.sr)
+        # Load model
+        self.model = GlowTTS(self.config, self.ap, self.tokenizer, speaker_manager=None)
+        self.model.load_checkpoint(
+            self.config,
+            checkpoint_path=self.model_path / "best_model.pth"
+        )
+        self.model.eval()
+    
+    def synthesize(self, text="Hello world", output_path=None):
+        if output_path is None:
+            output_path = OUTPUT_AUDIO_DIR / "output.wav"
+        else:
+            output_path = Path(output_path)
 
+        with torch.no_grad():
+            output = self.model.inference(text)
 
+        wav = output["wav"]
+        sf.write(output_path, wav, self.ap.sample_rate)
+
+def main():
+    parser = argparse.ArgumentParser(description="Synthesize speech from text using a trained TTS model.")
+
+    parser.add_argument(
+        "--output_path",
+        type=str,
+        help="Path to save the generated audio file",
+        default=OUTPUT_AUDIO_DIR / "output.wav"
+    )
+
+    args = parser.parse_args()
+
+    tts = TTS()
+
+    while True:
+        user_input = input("Enter text to synthesize (or 'exit' to quit): ")
+        if user_input.lower() == "exit":
+            break
+        tts.synthesize(user_input, args.output_path)
+
+if __name__ == "__main__":
+    main()

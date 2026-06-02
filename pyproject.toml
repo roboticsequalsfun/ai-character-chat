@@ -1,19 +1,33 @@
 [project]
 name = "ai_chat_project"
 version = "0.1.0"
-
 dependencies = [
-   "deepgram-sdk",
-   "whisper",
-   "pydub",
-   "tqdm",
-   "sounddevice",
-   "librosa",
-   "simpleaudio",
-   "llama-cpp-python",
-    "torch",
-    "torchaudio",
-   "wavio"
+    "tqdm",
+]
+
+[project.optional-dependencies]
+
+llm = [
+    "llama-cpp-python"
+]
+
+stt = [
+    "openai-whisper",
+    "librosa",
+    "deepgram-sdk",
+    "pydub"
+]
+
+tts = [
+    "TTS",
+    "pydub",
+    "scipy"
+]
+
+audio = [
+    "numpy",
+    "soundfile",
+    "sounddevice"
 ]
 
 [tool.setuptools]

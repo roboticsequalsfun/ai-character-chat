@@ -1,11 +1,11 @@
 import time
 import os
 from deepgram import DeepgramClient
-import whisper
 from pydub import AudioSegment
 from character_chat.shared.paths import TEMP_DIR, INPUT_AUDIO_DIR, SEPARATED_DIR
 from character_chat.shared.file_utils import load_config, write_json
 from character_chat.shared.audio_io import load_audio_pydub, write_audio
+from character_chat.shared.logger import log
 
 def configure():
     # Initialize Deepgram client
@@ -16,10 +16,10 @@ def configure():
 
     # Load configuration
     config = load_config()
-    input_file = INPUT_AUDIO_DIR / "Trump_WEF_2018.mp3"
-    punctuate = config.get("diarization", {}).get("punctuate", True)
-    diarize = config.get("diarization", {}).get("diarize", True)
-    MAX_SILENCE_MS = config.get("diarization", {}).get("max_silence_ms", 1000)
+    input_file = config.get("dataset_builder", {}).get("diarization", {}).get("audio_file", "input_audio.wav")
+    punctuate = config.get("dataset_builder", {}).get("diarization", {}).get("punctuate", True)
+    diarize = config.get("dataset_builder", {}).get("diarization", {}).get("enabled", True)
+    MAX_SILENCE_MS = config.get("dataset_builder", {}).get("diarization", {}).get("max_silence_ms", 1000)
 
     return {
         'dg_client': dg_client,
@@ -185,11 +185,11 @@ def save_word_timings_per_speaker(words, utterances, output_dir):
         write_json(output_file, speaker_words)
 
 def main():
-    print("===================================")
-    print(" Voice Track Separator Starting...")
-    print("===================================")
+    log("===================================" , "INFO")
+    log(" Voice Track Separator Starting...", "INFO")
+    log("===================================", "INFO")
 
-    print("Configuring environment and loading settings...")
+    log("Configuring environment and loading settings...", "INFO")
     config = configure()
     start_time = time.time()
     
@@ -201,12 +201,12 @@ def main():
     max_silence_ms = config['max_silence_ms']
 
     # Run diarization
-    print("Processing audio (this may take a while)...")
+    log("Processing audio (this may take a while)...", "INFO")
     response = diarize_audio(input_file, dg_client, punctuate, diarize)
-    print("Received response from Deepgram.")
+    log("Received response from Deepgram.", "INFO")
 
     # Load original audio
-    print("Separating audio by speaker(this may take a while)...")
+    log("Separating audio by speaker(this may take a while)...", "INFO")
     audio = load_audio_pydub(input_file)
     
     # Extract words and reconstruct utterances from speaker data in words
@@ -214,7 +214,7 @@ def main():
     utterances = reconstruct_utterances_from_words(words)
     
     if not utterances:
-        print("ERROR: No speaker data found in audio.")
+        log("No speaker data found in audio.", "ERROR")
         raise ValueError("Diarization failed - no speaker data detected")
 
     speaker_tracks = split_audio_by_speaker(
@@ -224,24 +224,24 @@ def main():
     )
     save_word_timings_per_speaker(words, utterances, TEMP_DIR)
 
-    print(f"Detected speakers: {sorted(speaker_tracks.keys())}")
-    print(f"Total utterances: {len(utterances)}")
+    log(f"Detected speakers: {sorted(speaker_tracks.keys())}", "INFO")
+    log(f"Total utterances: {len(utterances)}", "INFO")
 
     # Export audio files for each speaker
-    print("Exporting speaker audio files...")
+    log("Exporting speaker audio files...", "INFO")
 
     # Export each speaker's audio
     for speaker, speaker_audio in speaker_tracks.items():
-        print(f"Speaker {speaker}: {len(speaker_audio)} ms of audio")
+        log(f"Speaker {speaker}: {len(speaker_audio)} ms of audio", "INFO")
         audio_path = SEPARATED_DIR / f"speaker_{speaker}.wav"
         write_audio(audio_path, speaker_audio, sample_rate=16000)
-        print(f"Exported speaker {speaker} to {audio_path}")
+        log(f"Exported speaker {speaker} to {audio_path}", "INFO")
 
     # Final summary
     elapsed = time.time() - start_time
-    print("Processing complete.")
-    print(f"Total speakers exported: {len(speaker_tracks)}")
-    print(f"Total processing time: {elapsed:.2f} seconds")
+    log("Processing complete.", "INFO")
+    log(f"Total speakers exported: {len(speaker_tracks)}", "INFO")
+    log(f"Total processing time: {elapsed:.2f} seconds", "INFO")
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
 # shared/logger.py
 
-def log(msg):
-    print(f"[LOG] {msg}")
+def log(msg, level="INFO"):
+    print(f"[{level}] {msg}")

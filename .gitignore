@@ -1,13 +1,20 @@
 # Virtual environment
 venv/
+tts-venv/
+
+# Dev artifacts
+character_tts.bat
+character_chat.bat
 
 # IDE files
 *.code-workspace
 
-# Models
+# No files in these directories, but we want to keep the structure
 models/*
 !models/.gitkeep
 *.gguf
+external/*
+!external/.gitkeep
 
 # Python cache
 __pycache__/
@@ -21,9 +28,3 @@ data/**
 
 # External
 external/**
-
-# External repos
-external/llama.cpp/
-
-# Optional: cloned llama-cpp-python repo
-external/llama-cpp-python/

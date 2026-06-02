@@ -3,8 +3,7 @@ import time
 from character_chat.shared.paths import CHUNKS_DIR, SEPARATED_DIR, TEMP_DIR
 from character_chat.shared.audio_io import load_audio_librosa, write_audio
 from character_chat.shared.file_utils import ensure_dir, write_json, load_json, list_files_in_directory, load_config
-import numpy as np
-import soundfile as sf
+from character_chat.shared.logger import log
 
 def create_intelligent_chunks(word_timings, max_chunk_duration=10.0, min_chunk_duration=2.0):
     """
@@ -100,22 +99,22 @@ def save_chunks_for_speaker(audio_file, word_timings, speaker_id, max_chunk_dura
 
 
 def main():
-    print("===================================")
-    print(" Audio Chunker Starting...")
-    print("===================================")
+    log("===================================" , "INFO")
+    log(" Audio Chunker Starting...", "INFO")
+    log("===================================", "INFO")
 
     config = load_config()
-    max_chunk_duration = config.get("audio", {}).get("chunk_duration", 10.0)
-    min_chunk_duration = config.get("audio", {}).get("min_chunk_duration", 2.0)
-    enable_padding = config.get("audio", {}).get("padding", {}).get("enabled", True)
-    start_padding = config.get("audio", {}).get("padding", {}).get("start", 0.5)
-    end_padding = config.get("audio", {}).get("padding", {}).get("end", 0.5)
+    max_chunk_duration = config.get("dataset_builder", {}).get("chunk_audio", {}).get("chunk_duration", 5.0)
+    min_chunk_duration = config.get("dataset_builder", {}).get("chunk_audio", {}).get("min_chunk_duration", 2.0)
+    enable_padding = config.get("dataset_builder", {}).get("chunk_audio", {}).get("padding", {}).get("enabled", True)
+    start_padding = config.get("dataset_builder", {}).get("chunk_audio", {}).get("padding", {}).get("start", 0.5)
+    end_padding = config.get("dataset_builder", {}).get("chunk_audio", {}).get("padding", {}).get("end", 0.5)
     if not enable_padding:
         start_padding = 0.0
         end_padding = 0.0
 
-    print(f"[INFO] Starting intelligent chunking process...")
-    print(f"[INFO] Max chunk duration: {max_chunk_duration}s")
+    log(f"Starting intelligent chunking process...", "INFO")
+    log(f"Max chunk duration: {max_chunk_duration}s", "INFO")
 
     # Get unique speakers from separated directory
     speaker_files = list_files_in_directory(SEPARATED_DIR, extension=".wav")
@@ -126,7 +125,7 @@ def main():
         speaker_id = int(speaker_name.split('_')[1]) if '_' in speaker_name else 0
         word_timings = load_json(TEMP_DIR / f"word_timings_speaker_{speaker_id}.json")
         
-        print(f"[INFO] Processing {speaker_file}...")
+        log(f"Processing {speaker_file}...", "INFO")
 
         chunks_count = save_chunks_for_speaker(
             SEPARATED_DIR / speaker_file,
@@ -138,11 +137,11 @@ def main():
             end_padding
         )
         total_chunks += chunks_count
-        print(f"  Created {chunks_count} chunks for {speaker_name}")
+        log(f"  Created {chunks_count} chunks for {speaker_name}", "INFO")
 
-    print("===================================")
-    print(f"[DONE] All chunks saved ({total_chunks} total chunks)")
-    print("===================================")
+    log("===================================", "INFO")
+    log(f"[DONE] All chunks saved ({total_chunks} total chunks)", "INFO")
+    log("===================================", "INFO")
 
 
 if __name__ == "__main__":
