@@ -7,6 +7,11 @@ from TTS.tts.datasets import load_tts_samples
 from TTS.tts.models.glow_tts import GlowTTS
 from TTS.tts.utils.text.tokenizer import TTSTokenizer
 from TTS.utils.audio import AudioProcessor
+import trainer
+import TTS
+
+print(trainer.__version__)
+print(TTS.__version__)
 
 # LOAD CONFIG
 tts_config = load_config()
@@ -24,6 +29,9 @@ print_step = tts_config.get("tts_training", {}).get("print_step", 25)
 print_eval = tts_config.get("tts_training", {}).get("print_eval", False)
 mixed_precision = tts_config.get("tts_training", {}).get("mixed_precision", True)
 model_name = tts_config.get("tts_training", {}).get("model_name", "glow_tts")
+save_step = tts_config.get("tts_training", {}).get("save_step", 1000)
+save_checkpoints = tts_config.get("tts_training", {}).get("save_checkpoints", True)
+save_n_checkpoints = tts_config.get("tts_training", {}).get("save_n_checkpoints", 5)
 
 # DEFINE MODEL OUTPUT PATH
 speaker = tts_config.get("tts_training", {}).get("speaker_id", 0)
@@ -54,7 +62,13 @@ config = GlowTTSConfig(
     mixed_precision=mixed_precision,
     output_path=model_dir,
     datasets=[dataset_config],
+    save_step=save_step,
+    save_checkpoints=save_checkpoints,
+    save_n_checkpoints=save_n_checkpoints,
 )
+
+print("MODEL DIR:", model_dir)
+print("CONFIG OUTPUT:", config.output_path)
 
 # INITIALIZE THE AUDIO PROCESSOR
 ap = AudioProcessor.init_from_config(config)
@@ -75,7 +89,12 @@ model = GlowTTS(config, ap, tokenizer, speaker_manager=None)
 
 # INITIALIZE THE TRAINER
 trainer = Trainer(
-    TrainerArgs(), config, model_dir, model=model, train_samples=train_samples, eval_samples=eval_samples
+    TrainerArgs(),
+    config,
+    output_path=model_dir,
+    model=model,
+    train_samples=train_samples,
+    eval_samples=eval_samples
 )
 
 def main():

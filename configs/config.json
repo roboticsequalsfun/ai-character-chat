@@ -22,7 +22,10 @@
     "print_eval": false,
     "mixed_precision": true,
     "model_name": "glow_tts",
-    "speaker_id": 0
+    "speaker_id": 0,
+    "save_step": 100,
+    "save_checkpoints": true,
+    "save_n_checkpoints": 5
   },
 
   "audio": {
