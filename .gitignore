@@ -16,6 +16,8 @@ models/*
 *.gguf
 external/*
 !external/.gitkeep
+data/*
+!data/.gitkeep
 
 # Python cache
 __pycache__/
@@ -24,8 +26,3 @@ __pycache__/
 # Build/package metadata
 *.egg-info/
 
-# Data
-data/**
-
-# External
-external/**
