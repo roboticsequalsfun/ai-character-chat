@@ -8,6 +8,7 @@ character_chat.bat
 
 # IDE files
 *.code-workspace
+.vscode/
 
 # No files in these directories, but we want to keep the structure
 models/*
