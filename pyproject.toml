@@ -3,6 +3,7 @@ name = "ai_chat_project"
 version = "0.1.0"
 dependencies = [
     "tqdm",
+    "pydub"
 ]
 
 [project.optional-dependencies]
@@ -15,12 +16,10 @@ stt = [
     "openai-whisper",
     "librosa",
     "deepgram-sdk",
-    "pydub"
 ]
 
 tts = [
     "TTS",
-    "pydub",
     "scipy"
 ]
 

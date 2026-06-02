@@ -4,10 +4,11 @@ import sys
 
 # ---- 1. Create virtual environment ----
 subprocess.run([sys.executable, "-m", "venv", "venv"])
+subprocess.run([sys.executable, "-m", "venv", "tts-venv"])
 
 # ---- 2. Install package in editable mode ----
-# NOTE: activation is NOT needed inside Python
-subprocess.run([r"venv\Scripts\python.exe", "-m", "pip", "install", "-e", "."])
+subprocess.run([r"venv\Scripts\python.exe", "-m", "pip", "install", "-e", "[llm,stt,audio]"])
+subprocess.run([r"tts-venv\Scripts\python.exe", "-m", "pip", "install", "-e", "[tts,audio]"])
 
 # ---- 3. Set root folder ----
 ROOT = Path("data")
