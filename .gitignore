@@ -10,7 +10,7 @@ character_chat.bat
 *.code-workspace
 .vscode/
 
-# No files in these directories, but we want to keep the structure
+# External data
 models/*
 !models/.gitkeep
 *.gguf

@@ -1,0 +1,31 @@
+{
+  "active_character": "character",
+
+  "stt": {
+    "model": "tiny"
+  },
+
+  "tts": {
+    "model_path": "path/to/tts/model"
+  },
+
+  "audio": {
+    "sample_rate": 44100,
+    "silence_duration": 0.01,
+    "silence_threshold": 0.5,
+    "min_record_time": 2.0,
+    "channels": 1,
+    "block_size": 1024,
+    "device_index": 1
+  },
+
+  "llm": {
+    "model": "path/to/model.gguf",
+    "n_gpu_layers": -1,
+    "low_vram": false,
+    "max_tokens": 60,
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "stop": null
+  }
+}

@@ -1,0 +1,20 @@
+{
+    "chunk_audio": {
+      "chunk_duration": 5.0,
+      "min_chunk_duration": 2.0,
+      "padding": {
+        "enabled": true,
+        "start": 0.5,
+        "end": 0.5
+      }
+    },
+
+    "diarization": {
+      "max_silence_ms": 500,
+      "audio_file": "training_audio.mp3",
+      "enabled": true,
+      "punctuate": true
+    },
+
+    "cache_run": true
+}

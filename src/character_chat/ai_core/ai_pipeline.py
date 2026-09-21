@@ -107,8 +107,8 @@ class AIPipeline:
 
     def record_audio(self):
         self.audio_recorder.record()
-    
-def main():
+
+if __name__ == "__main__":
     pipeline = AIPipeline()
     pipeline.setup()
 
@@ -121,6 +121,3 @@ def main():
         pipeline.play_audio(pipeline.output_audio_path)
         if command.lower() == "exit":
             break
-
-if __name__ == "__main__":
-    main()

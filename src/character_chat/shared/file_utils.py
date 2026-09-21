@@ -1,6 +1,7 @@
 from pathlib import Path
 import json
-from character_chat.shared.paths import CONFIG_PATH
+from character_chat.shared.logger import log
+from character_chat.shared.paths import CONFIG_DIR, APP_CONFIG_PATH, DATASET_BUILDER_CONFIG_PATH, TTS_TRAINING_CONFIG_PATH
 
 def ensure_dir(path):
     path.mkdir(parents=True, exist_ok=True)
@@ -14,8 +15,20 @@ def load_json(path):
         raise FileNotFoundError(f"JSON file {path} does not exist.")
     return json.loads(path.read_text())
 
-def load_config():
-    with open(CONFIG_PATH, "r") as f:
+def load_config(config_type):
+    config = None
+
+    match config_type:
+        case "app":
+            config = APP_CONFIG_PATH
+        case "dataset_builder":
+            config = DATASET_BUILDER_CONFIG_PATH
+        case "tts_training":
+            config = TTS_TRAINING_CONFIG_PATH
+        case _:
+            log("")
+
+    with open(CONFIG_DIR / config, "r") as f:
         return json.load(f)
 
 def write_file(path, content=None):

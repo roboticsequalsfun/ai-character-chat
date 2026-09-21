@@ -1,247 +1,116 @@
-import time
-import os
-from deepgram import DeepgramClient
+import torch
+import subprocess
+import warnings
+from pathlib import Path
+import sys
+from pathlib import Path
 from pydub import AudioSegment
-from character_chat.shared.paths import TEMP_DIR, INPUT_AUDIO_DIR, SEPARATED_DIR
+from pyannote.audio.utils.reproducibility import ReproducibilityWarning
+from pyannote.audio import Pipeline
+from character_chat.shared.paths import INPUT_AUDIO_DIR, TEMP_DIR
 from character_chat.shared.file_utils import load_config, write_json
 from character_chat.shared.audio_io import load_audio_pydub, write_audio
 from character_chat.shared.logger import log
 
-def configure():
-    # Initialize Deepgram client
-    DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
-    if not DEEPGRAM_API_KEY:
-        raise ValueError("DEEPGRAM_API_KEY environment variable not set, please create it if you haven't already and set it to your Deepgram API key")
-    dg_client = DeepgramClient(api_key=DEEPGRAM_API_KEY)
+def main(input_file_name=None, punctuate=True, diarize=True, max_silence_ms=1000):
+    warnings.filterwarnings("ignore", category=ReproducibilityWarning)
+    warnings.filterwarnings("ignore", category=UserWarning)
+    path = Path(INPUT_AUDIO_DIR / input_file_name)
 
-    # Load configuration
-    config = load_config()
-    input_file = config.get("dataset_builder", {}).get("diarization", {}).get("audio_file", "input_audio.wav")
-    punctuate = config.get("dataset_builder", {}).get("diarization", {}).get("punctuate", True)
-    diarize = config.get("dataset_builder", {}).get("diarization", {}).get("enabled", True)
-    MAX_SILENCE_MS = config.get("dataset_builder", {}).get("diarization", {}).get("max_silence_ms", 1000)
-
-    return {
-        'dg_client': dg_client,
-        'input_file': input_file,
-        'punctuate': punctuate,
-        'diarize': diarize,
-        'max_silence_ms': MAX_SILENCE_MS
-    }
-
-
-# Function to perform diarization and return response
-def diarize_audio(file_path, dg_client, punctuate, diarize):
-    with open(file_path, "rb") as audio_file:
-        response = dg_client.listen.v1.media.transcribe_file(
-            request=audio_file,
-            punctuate=punctuate,
-            diarize=diarize,
-        )
-    return response
-
-
-def reconstruct_utterances_from_words(words):
-    """Group words by speaker to create utterances."""
-    if not words:
-        return []
-    
-    utterances = []
-    current_utterance = None
-    
-    for word in words:
-        speaker = word.speaker
-        
-        # Start new utterance if speaker changes
-        if current_utterance is None or current_utterance['speaker'] != speaker:
-            if current_utterance is not None:
-                utterances.append(current_utterance)
-            
-            current_utterance = {
-                'speaker': speaker,
-                'start': word.start,
-                'end': word.end,
-                'confidence': word.speaker_confidence,
-            }
-        else:
-            # Extend current utterance
-            current_utterance['end'] = word.end
-    
-    # Add the last utterance
-    if current_utterance is not None:
-        utterances.append(current_utterance)
-    
-    return utterances
-
-# Process each utterance segment and append to corresponding speaker's audio
-def split_audio_by_speaker(utterances, audio, max_silence_ms):    
-    speaker_audio_map = {}
-    prev_end_map = {}
-
-    for segment in utterances:
-        speaker = segment['speaker']
-        start_ms = int(segment['start'] * 1000)
-        end_ms = int(segment['end'] * 1000)
-
-        if speaker not in speaker_audio_map:
-            speaker_audio_map[speaker] = AudioSegment.empty()
-            prev_end_map[speaker] = None
-
-        # Calculate gap from previous utterance
-        if prev_end_map[speaker] is not None:
-            gap = start_ms - prev_end_map[speaker]
-
-            # Only add silence if gap exists
-            if gap > 0:
-                # Clamp long pauses
-                if gap > max_silence_ms:
-                    gap = max_silence_ms
-
-                speaker_audio_map[speaker] += AudioSegment.silent(duration=gap)
-
-        # Add actual utterance audio
-        speaker_audio_map[speaker] += audio[start_ms:end_ms]
-        # Update last end
-        prev_end_map[speaker] = end_ms
-
-    return speaker_audio_map
-
-# Save per-speaker word timings with remapped times for intelligent chunking
-def save_word_timings_per_speaker(words, utterances, output_dir):
-    # Build a map of utterance ranges for each speaker
-    speaker_utterance_ranges = {}
-    for utterance in utterances:
-        speaker = utterance['speaker']
-        if speaker not in speaker_utterance_ranges:
-            speaker_utterance_ranges[speaker] = []
-        speaker_utterance_ranges[speaker].append({
-            'original_start': utterance['start'],
-            'original_end': utterance['end']
-        })
-    
-    # Calculate concatenated audio timeline for each speaker
-    # Account for silence gaps between utterances
-    speaker_local_timelines = {}
-    for speaker, ranges in speaker_utterance_ranges.items():
-        timeline = []
-        current_local_time = 0
-        max_silence_ms = 1000  # Default value, matches split_audio_by_speaker
-        
-        for i, utterance_range in enumerate(ranges):
-            utterance_duration = utterance_range['original_end'] - utterance_range['original_start']
-            local_start = current_local_time
-            local_end = current_local_time + utterance_duration
-            
-            timeline.append({
-                'original_start': utterance_range['original_start'],
-                'original_end': utterance_range['original_end'],
-                'local_start': local_start,
-                'local_end': local_end
-            })
-            
-            # Add silence gap for next utterance (if there is one)
-            if i < len(ranges) - 1:
-                gap = ranges[i + 1]['original_start'] - utterance_range['original_end']
-                if gap > max_silence_ms:
-                    gap = max_silence_ms
-                current_local_time = local_end + gap
-            else:
-                current_local_time = local_end
-        
-        speaker_local_timelines[speaker] = timeline
-    
-    # Remap word timings to local speaker timelines
-    for speaker, timeline in speaker_local_timelines.items():
-        speaker_words = []
-        
-        for word in words:
-            if word.speaker != speaker:
-                continue
-            
-            # Find which utterance this word belongs to
-            word_time = word.start
-            local_offset = None
-            
-            for segment in timeline:
-                if segment['original_start'] <= word_time < segment['original_end']:
-                    # This word is in this segment
-                    offset_in_segment = word_time - segment['original_start']
-                    local_offset = segment['local_start'] + offset_in_segment
-                    break
-            
-            if local_offset is not None:
-                # Calculate remapped end time
-                word_duration = word.end - word.start
-                speaker_words.append({
-                    'word': word.word,
-                    'start': local_offset,
-                    'end': local_offset + word_duration,
-                    'speaker': speaker
-                })
-        
-        # Save per-speaker word timings
-        output_file = output_dir / f"word_timings_speaker_{speaker}.json"
-
-        write_json(output_file, speaker_words)
-
-def main():
     log("===================================" , "INFO")
     log(" Voice Track Separator Starting...", "INFO")
     log("===================================", "INFO")
 
-    log("Configuring environment and loading settings...", "INFO")
-    config = configure()
-    start_time = time.time()
-    
-    # Unpack config for easier access
-    dg_client = config['dg_client']
-    input_file = config['input_file']
-    punctuate = config['punctuate']
-    diarize = config['diarize']
-    max_silence_ms = config['max_silence_ms']
+    if not path.is_file():
+        log(f"File {input_file_name} does not exist", "ERROR")
+        sys.exit()
 
-    # Run diarization
-    log("Processing audio (this may take a while)...", "INFO")
-    response = diarize_audio(input_file, dg_client, punctuate, diarize)
-    log("Received response from Deepgram.", "INFO")
+    if input_file_name.split(".")[1] != "wav":
+        log("Converting audio file to WAV...", "INFO")
+        input = convert_audio(input_file_name, path)
+    else:
+        input = str(path)
 
-    # Load original audio
-    log("Separating audio by speaker(this may take a while)...", "INFO")
-    audio = load_audio_pydub(input_file)
-    
-    # Extract words and reconstruct utterances from speaker data in words
-    words = response.results.channels[0].alternatives[0].words
-    utterances = reconstruct_utterances_from_words(words)
-    
-    if not utterances:
-        log("No speaker data found in audio.", "ERROR")
-        raise ValueError("Diarization failed - no speaker data detected")
+    log("Running diarization... (This may take a while)", "INFO")
 
-    speaker_tracks = split_audio_by_speaker(
-        utterances,
-        audio,
-        max_silence_ms
-    )
-    save_word_timings_per_speaker(words, utterances, TEMP_DIR)
-
-    log(f"Detected speakers: {sorted(speaker_tracks.keys())}", "INFO")
-    log(f"Total utterances: {len(utterances)}", "INFO")
-
-    # Export audio files for each speaker
-    log("Exporting speaker audio files...", "INFO")
-
-    # Export each speaker's audio
-    for speaker, speaker_audio in speaker_tracks.items():
-        log(f"Speaker {speaker}: {len(speaker_audio)} ms of audio", "INFO")
-        audio_path = SEPARATED_DIR / f"speaker_{speaker}.wav"
-        write_audio(audio_path, speaker_audio, sample_rate=16000)
-        log(f"Exported speaker {speaker} to {audio_path}", "INFO")
-
-    # Final summary
-    elapsed = time.time() - start_time
+    if diarize:
+        diarize_audio(input)
     log("Processing complete.", "INFO")
-    log(f"Total speakers exported: {len(speaker_tracks)}", "INFO")
-    log(f"Total processing time: {elapsed:.2f} seconds", "INFO")
+
+def convert_audio(file_name, path):
+    command = [
+        "ffmpeg", 
+        "-i", 
+        str(path), 
+        "-ar", 
+        "16000", 
+        "-ac", 
+        "1", 
+        str(INPUT_AUDIO_DIR / file_name.split(".")[0]) + ".wav"
+    ]
+    
+    try:
+        subprocess.run(command, check=True)
+        log(f"Successfully converted input file: {file_name}", "INFO")
+    except subprocess.CalledProcessError as e:
+        log(f"FFmpeg failed to process the file: {e}", "ERROR")
+    
+    return str(INPUT_AUDIO_DIR / file_name.split(".")[0]) + ".wav"
+
+def diarize_audio(input):
+    speakers = get_speakers(input)
+    write_json(TEMP_DIR / f"speakers.json", speakers)
+    export_audio(speakers)
+
+def get_speakers(input):
+    pipeline = Pipeline.from_pretrained(
+        "pyannote/speaker-diarization-community-1",
+        token="PyannoteToken")
+
+    # send pipeline to GPU (when available)
+    pipeline.to(torch.device("cuda"))
+    diarization = pipeline(input)
+
+    speakers = []
+    last_speaker = -1
+    last_end = -1
+    group = 0
+
+    for turn, _, speaker_name in diarization.speaker_diarization.itertracks(yield_label=True):
+        speaker = int(speaker_name.split("_")[1])
+        if speaker != last_speaker:
+            if not group in speakers:
+                speakers.append({})
+            if not group == 0:
+                speakers[group - 1].append({
+                    'stop': last_end, 
+                    'speaker': last_speaker
+                })
+            speakers[group].append({
+                'start': round(turn.start, 1), 
+                'speaker': speaker
+            })
+            group += 1
+        last_end = round(turn.end, 1)
+        last_speaker = speaker
+    return speakers
+
+def export_audio(speakers, audio_file):
+    audio = AudioSegment.from_file(audio_file)
+    chunks = []
+
+    last
+    last_cut_ms = 0
+    for speakers in speakers:
+        cut_ms = int(speakers['location'] * 1000)
+
+        chunks.append(audio[last_cut_ms:cut_ms])
+
+        last_cut_ms = cut_ms
+
 
 if __name__ == "__main__":
-    main()
+    input = input("Enter the name of the input audio file (or press Enter to use default): ")
+    if not input:
+        input = "audio.wav"
+    main(input_file_name=input)

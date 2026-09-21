@@ -4,23 +4,50 @@ from character_chat.shared.paths import CHUNKS_DIR, DATASET_WAV_DIR, TRANSCRIPT_
 from character_chat.shared.file_utils import ensure_dir, load_json, write_file, load_file, list_files_in_directory, load_config
 from character_chat.shared.logger import log
 
-def build_dataset_for_speaker(speaker_metadata, word_timings, speaker_name):
-        for i, chunk in enumerate(speaker_metadata):
+class DatasetBuilder():
+    def __init__(self, cache):
+        log("===================================", "INFO")
+        log("Starting dataset building...", "INFO")
+        log("===================================", "INFO")
+
+        speaker_folders = [f for f in CHUNKS_DIR.iterdir() if f.is_dir()]
+
+        for speaker_folder in speaker_folders:
+            self.speaker_name = speaker_folder.name
+            speaker_id = int(self.speaker_name.split('_')[1])
+            
+            # Load per-speaker word timings (already remapped to local audio timeline)
+            word_timings_path = TEMP_DIR / f"word_timings_speaker_{speaker_id}.json"
+            metadata_path = TEMP_DIR / f"chunks_metadata_{speaker_id}.json"
+
+            self.word_timings = load_json(word_timings_path)
+            self.chunks_metadata = load_json(metadata_path)
+
+            log(f"[INFO] Building dataset entries for {speaker_folder}...", "INFO")
+
+            build_dataset_for_speaker(chunks_metadata, word_timings, speaker_name)
+            create_metadata_for_speaker(speaker_name)
+        if cache:
+            cache_run(RUN_DIR)
+        log("Dataset building complete. Final dataset is ready for training!", "INFO")
+
+def build_dataset_for_speaker(self,):
+        for i, chunk in enumerate(self.speaker_metadata):
             chunk_start = chunk['start']
             chunk_end = chunk['end']
             chunk_duration = chunk['duration']
             
             # Find words that fall within this chunk
             chunk_words = [
-                word for word in word_timings
+                word for word in self.word_timings
                 if word['start'] >= chunk_start and word['end'] <= chunk_end
             ]
 
             words = " ".join([w['word'] for w in chunk_words])
 
-            write_file(TRANSCRIPT_DIR / speaker_name / f"chunk_transcript_{i:04d}.txt", words)
-            src = CHUNKS_DIR / speaker_name / f"chunk_{i:04d}.wav"
-            dst = DATASET_WAV_DIR / speaker_name / f"chunk_{i:04d}.wav"
+            write_file(TRANSCRIPT_DIR / self.speaker_name / f"chunk_transcript_{i:04d}.txt", words)
+            src = CHUNKS_DIR / self.speaker_name / f"chunk_{i:04d}.wav"
+            dst = DATASET_WAV_DIR / self.speaker_name / f"chunk_{i:04d}.wav"
             shutil.copy2(src, dst)
 
             log(f"Created dataset entry for {i:04d} with {len(chunk_words)} words.", "INFO")
@@ -77,36 +104,3 @@ def create_metadata_for_speaker(speaker_id):
         normalized = txt_contents.lower().strip()
         lines.append(f"{relative_path}|{txt_contents}|{normalized}")
     write_file(metadata, "\n".join(lines))
-
-
-def main():
-    log("===================================", "INFO")
-    log("Starting dataset building...", "INFO")
-    log("===================================", "INFO")
-
-    speaker_folders = [f for f in CHUNKS_DIR.iterdir() if f.is_dir()]
-
-    config = load_config()
-    cache = config.get("dataset_builder", {}).get("cache_run")
-
-    for speaker_folder in speaker_folders:
-        speaker_name = speaker_folder.name
-        speaker_id = int(speaker_name.split('_')[1])
-        
-        # Load per-speaker word timings (already remapped to local audio timeline)
-        word_timings_path = TEMP_DIR / f"word_timings_speaker_{speaker_id}.json"
-        metadata_path = TEMP_DIR / f"chunks_metadata_{speaker_id}.json"
-
-        word_timings = load_json(word_timings_path)
-        chunks_metadata = load_json(metadata_path)
-
-        log(f"[INFO] Building dataset entries for {speaker_folder}...", "INFO")
-
-        build_dataset_for_speaker(chunks_metadata, word_timings, speaker_name)
-        create_metadata_for_speaker(speaker_name)
-    if cache:
-        cache_run(RUN_DIR)
-    log("Dataset building complete. Final dataset is ready for training!", "INFO")
-
-if __name__ == "__main__":
-    main()
