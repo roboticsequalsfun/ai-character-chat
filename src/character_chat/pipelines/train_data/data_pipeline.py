@@ -1,29 +1,35 @@
-from character_chat.pipelines.train_data.speaker_separator import SpeakerSeparator
-from character_chat.pipelines.train_data.audio_chunker import AudioChunker
-from character_chat.pipelines.train_data.dataset_builder import DatasetBuilder
+from character_chat.pipelines.train_data.speaker_separator import main as speaker_separator
+from character_chat.pipelines.train_data.audio_chunker import main as audio_chunker
+from character_chat.pipelines.train_data.dataset_builder import main as dataset_builder
 from character_chat.shared.file_utils import load_config
 from character_chat.shared.logger import log
-from character_chat.shared.paths import INPUT_AUDIO_DIR
-import argparse
+
+log("===================================", "INFO")
+log(" Building Dataset...", "INFO")
+log("===================================\n", "INFO")
 
 config = load_config("dataset_builder")
 cache = config.get("cache_run", True)
 
-input_file = INPUT_AUDIO_DIR / config.get("diarization", {}).get("audio_file", "input_audio.wav")
-punctuate = config.get("diarization", {}).get("punctuate", True)
-diarize = config.get("diarization", {}).get("enabled", True)
-max_silence_ms = config.get("diarization", {}).get("max_silence_ms", 1000)
-max_chunk_duration = config.get("chunk_audio", {}).get("chunk_duration", 5.0)
-min_chunk_duration = config.get("chunk_audio", {}).get("min_chunk_duration", 2.0)
-enable_padding = config.get("chunk_audio", {}).get("padding", {}).get("enabled", True)
-start_padding = config.get("chunk_audio", {}).get("padding", {}).get("start", 0.5)
-end_padding = config.get("chunk_audio", {}).get("padding", {}).get("end", 0.5)
-if not enable_padding:
-    start_padding = 0.0
-    end_padding = 0.0
+input_file = config.get("diarization", {}).get("audio_file", "input_audio.wav")
+device = config.get("diarization", {}).get("device", "cuda")
+batch_size = config.get("diarization", {}).get("batch_size", 16)
+compute_type = config.get("diarization", {}).get("compute_type", "float16")
+max_chunk_duration = config.get("chunk_audio", {}).get("max_chunk_duration", 10.0)
+min_chunk_duration = config.get("chunk_audio", {}).get("min_chunk_duration", 5.0)
+ideal_chunk_duration = config.get("chunk_audio", {}).get("ideal_chunk_duration", 7.0)
+min_silence_duration = config.get("chunk_audio", {}).get("min_silence_duration", 0.01)
+weights = config.get("chunk_audio", {}).get("weights")
 
-SpeakerSeparator(input_file=input_file, punctuate=punctuate, diarize=diarize, max_silence_ms=max_silence_ms)
-AudioChunker(max_chunk_duration=max_chunk_duration, min_chunk_duration=min_chunk_duration, start_padding=start_padding, end_padding=end_padding)
-DatasetBuilder(cache=cache)
+speaker_separator(input=input_file, device=device, batch_size=batch_size, compute_type=compute_type)
+audio_chunker(max_chunk_duration=max_chunk_duration, 
+    min_chunk_duration=min_chunk_duration, 
+    ideal_chunk_duration=ideal_chunk_duration, 
+    min_silence_duration=min_silence_duration,
+    weights=weights
+)
+dataset_builder(cache=cache)
 
-log("All processing complete. Dataset is ready for training!", "INFO")
+log("===================================", "INFO")
+log("All Proccesing complete! Dataset ready for training", "INFO")
+log("===================================", "INFO")

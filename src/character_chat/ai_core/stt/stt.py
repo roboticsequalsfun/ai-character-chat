@@ -1,6 +1,6 @@
 import whisper
-import argparse
-from character_chat.shared.paths import PROJECT_DIR, INPUT_AUDIO_DIR
+from character_chat.shared.paths import INPUT_AUDIO_DIR
+from character_chat.shared.file_utils import load_config
 
 class STT:
     def __init__(self, model_size="large"):
@@ -13,26 +13,12 @@ class STT:
         return result['text']
 
 def main():
-    parser = argparse.ArgumentParser(description="Speech-to-text runner")
+    config = load_config("app")
 
-    parser.add_argument(
-        "--file",
-        type=str,
-        help="Path to audio file for transcription"
-    )
-
-    args = parser.parse_args()
-    file_path = (PROJECT_DIR / args.file).resolve()
-
-    stt = STT()
-
-    if args.file:
-        result = stt.transcribe(audio_path=str(file_path))
-        print(result)
-        return
+    stt = STT(model_size=config.get("stt", {}).get("model", "large"))
 
     while True:
-        user_input = input("Enter path to audio file for transcription: ")
+        user_input = input("Enter name of audio file for transcription (type exit to escape): ")
         if user_input.lower() == "exit":
             break
         result = stt.transcribe(audio_path=str((INPUT_AUDIO_DIR / user_input).resolve()))

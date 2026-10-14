@@ -1,97 +1,103 @@
-import queue
-import sounddevice as sd
-import soundfile as sf
+import pyaudio
 from character_chat.shared.file_utils import load_config
+from character_chat.shared.logger import log
 from character_chat.shared.paths import INPUT_AUDIO_DIR
-import numpy as np
+import wave
+import math
+import time
+import struct
 
 class AudioRecorder:
-    def __init__(self, sample_rate=16000, block_size=1024, device_index=None, silence_threshold=0.02, silence_duration=1.0, min_record_time=2.0, channel=1, output_path=INPUT_AUDIO_DIR / "recorded.wav"):
-        self.sample_rate = sample_rate
-        self.block_size = block_size
-        self.device_index = device_index
-        self.silence_threshold = silence_threshold
-        self.silence_duration = silence_duration
-        self.min_record_time = min_record_time
-        self.channel = channel
-        self.audio_path = output_path
-        self.audio_queue = queue.Queue()
-        self.stream = sd.InputStream(
-            samplerate=self.sample_rate,
-            # device=self.device_index,
-            channels=self.channel,
-            blocksize=self.block_size,
-            callback=self.callback
-        )
+    @staticmethod
+    def rms(frame):
+        count = len(frame) / 2
+        format = "%dh" % (count)
+        shorts = struct.unpack(format, frame)
+
+        sum_squares = 0.0
+        for sample in shorts:
+            n = sample * (1.0/32768.0)
+            sum_squares += n * n
+        rms = math.pow(sum_squares / count, 0.5)
+
+        return rms * 1000
+
+    def __init__(self, chunk_size=1024, channels=1, 
+                rate=48000, input=True, 
+                frames_per_buffer=1024, format=pyaudio.paInt16, 
+                timeout_length=5, threshold=10,
+                output_path=INPUT_AUDIO_DIR / "recorded.wav"):
+        self.chunk_size = chunk_size
+        self.output_path = str(output_path)
+        self.channels = channels
+        self.rate = rate
+        self.input = input
+        self.frames_per_buffer = frames_per_buffer
+        self.format = format
+        self.timeout_length = timeout_length
+        self.threshold = threshold
         
-    def callback(self, indata, frames, time, status):
-        if status:
-            print(status)
-        self.audio_queue.put(indata.copy())
+        self.p = pyaudio.PyAudio()
 
-    def start(self):
-        self.stream.start()
-
-    def stop(self):
-        self.stream.stop()
-
-    def close(self):
-        self.stream.close()
-
-    def get_chunk(self):
-        return self.audio_queue.get()
+        # Open stream
+        self.stream = self.p.open(
+            format=self.format,
+            channels=self.channels,
+            rate=self.rate,
+            input=self.input,
+            frames_per_buffer=self.frames_per_buffer,
+        )
 
     def record(self):
-        self.start()
+        log('Noise detected, recording beginning', "INFO")
+        rec = []
+        current = time.time()
+        end = time.time() + self.timeout_length
 
-        recording = []
-        silence_time = 0
-        recording_started = False
-        block_duration = self.block_size / self.sample_rate
+        while current <= end:
+            data = self.stream.read(self.chunk_size)
+            if self.rms(data) >= self.threshold: end = time.time() + self.timeout_length
 
+            current = time.time()
+            rec.append(data)
+        self.write(b''.join(rec))
+
+    def write(self, recording):
+        wf = wave.open(self.output_path, 'wb')
+        wf.setnchannels(self.channels)
+        wf.setsampwidth(self.p.get_sample_size(self.format))
+        wf.setframerate(self.rate)
+        wf.writeframes(recording)
+        wf.close()
+        log('Written to file: {}'.format(self.output_path), "INFO")
+
+
+
+    def listen(self):
+        log('Listening beginning', "INFO")
         while True:
-            chunk = self.get_chunk()
-            chunk_energy = np.sqrt(np.mean(chunk**2))
+            input = self.stream.read(self.chunk_size)
+            rms_val = self.rms(input)
+            if rms_val > self.threshold:
+                self.record()
+                break
 
-            if not recording_started:
-                if chunk_energy > self.silence_threshold:
-                    recording_started = True
-                else:
-                    continue
-            
-            recording.append(chunk)
-
-            if chunk_energy < self.silence_threshold:
-                silence_time += block_duration
-            else:
-                silence_time = 0
-
-            if silence_time >= self.silence_duration:
-                recorded_time = len(recording) * block_duration
-                if silence_time >= self.silence_duration:
-                    if recorded_time < self.min_record_time:
-                        continue
-                    break
-        
-        print("Chunks collected:", len(recording))
-        print("First chunk shape:", recording[0].shape if recording else None)
-
-        self.stop()
-        audio = np.concatenate(recording, axis=0)
-        sf.write(str(self.audio_path), audio, self.sample_rate, subtype='PCM_16')
 
 def main():
-    config = load_config()
+    config = load_config("app")
     recorder = AudioRecorder(
-        sample_rate=config.get("audio", {}).get("sample_rate", 16000),
-        block_size=config.get("audio", {}).get("block_size", 1024),
-        device_index=config.get("audio", {}).get("device_index"),
-        silence_threshold=config.get("audio", {}).get("silence_threshold", 0.5),
-        silence_duration=config.get("audio", {}).get("silence_duration", 0.01),
-        min_record_time=config.get("audio", {}).get("min_record_time", 2.0),
-        channel=config.get("audio", {}).get("channels", 1)
+        chunk_size=config.get("audio", {}).get("chunk_size", 1024), 
+        channels=config.get("audio", {}).get("channels", 1), 
+        rate=config.get("audio", {}).get("rate", 48000), 
+        input=config.get("audio", {}).get("input", True), 
+        frames_per_buffer=config.get("audio", {}).get("frames_per_buffer", 1024),
+        format=pyaudio.paInt16,
+        timeout_length=config.get("audio", {}).get("timeout_length", 5), 
+        threshold=config.get("audio", {}).get("threshold", 10),
+        output_path=INPUT_AUDIO_DIR / "recorded.wav"
     )
-    recorder.record()
+
+    recorder.listen()
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,0 @@
-{
-  "name": "character",
-  "system_prompt": "prompts/characters/system_prompt.txt",
-  "character_prompt": "prompts/characters/character_prompt.txt",
-  "voice_model": "character"
-}

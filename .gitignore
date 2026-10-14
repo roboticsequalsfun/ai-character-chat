@@ -12,6 +12,8 @@ character_chat.bat
 
 # External data
 models/*
+configs/characters/*
+configs/prompts/*
 !models/.gitkeep
 *.gguf
 external/*
