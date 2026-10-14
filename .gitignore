@@ -24,7 +24,9 @@ data/*
 # Python cache
 __pycache__/
 *.pyc
+*.python-version
 
 # Build/package metadata
 *.egg-info/
-
+uv.lock
+*.bak
