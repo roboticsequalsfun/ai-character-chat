@@ -1,7 +1,7 @@
 import inspect
 import os
 
-def log(msg, level="INFO"):
+def log(msg: str, level: str = "INFO", no_origin: bool = False) -> None:
     # Get the caller's frame (2 levels up: 1 for this method, 1 for the caller)
     frame = inspect.currentframe().f_back
     filename = os.path.basename(frame.f_code.co_filename)
@@ -16,6 +16,9 @@ def log(msg, level="INFO"):
         case "WARNING":
             print(f"{level}: {origin}: {msg}")
         case "ERROR":
-            raise Exception(f"{level}: {origin} {msg}")
+            if not no_origin:
+                raise Exception(f"{level}: {origin} {msg}")
+            else:
+                raise Exception(f"{level}: {msg}")
         case _:
             raise Exception("Unkown log level")

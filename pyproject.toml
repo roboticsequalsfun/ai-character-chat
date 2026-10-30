@@ -1,11 +1,11 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools>=61.0.0", "wheel", "uv_build >= 0.13.5, < 0.14.0"]
+build-backend = "uv_build"
 
 [project]
-name = "ai_chat_project"
+name = "ai_character_chat"
 version = "0.1.0"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "absl-py",
     "aiohappyeyeballs",
@@ -52,7 +52,7 @@ dependencies = [
     "hf-xet",
     "httpcore",
     "httpx",
-    "huggingface-hub",
+    "huggingface-hub>=0.34.0,<1.0",
     "idna",
     "inflect",
     "intel-openmp",
@@ -88,9 +88,9 @@ dependencies = [
     "num2words",
     "numba",
     "numpy",
-    "nvidia-cublas-cu12==12.9.2.10",
-    "nvidia-cuda-nvrtc-cu12==12.9.86",
-    "nvidia-cudnn-cu12==9.27.0.42",
+    "nvidia-cublas-cu12",
+    "nvidia-cuda-nvrtc-cu12",
+    "nvidia-cudnn-cu12",
     "omegaconf",
     "onnxruntime",
     "opentelemetry-api",
@@ -108,13 +108,14 @@ dependencies = [
     "pandas",
     "pedalboard",
     "pillow",
+    "pick"
     "platformdirs",
     "pooch",
     "primepy",
     "propcache",
     "protobuf",
     "psutil",
-    "pyannote-audio",
+    "pyannote-audio==4.0.7",
     "pyannote-core",
     "pyannote-database",
     "pyannote-metrics",
@@ -140,8 +141,8 @@ dependencies = [
     "shellingham",
     "six",
     "sortedcontainers",
-    "sounddevice",
     "soundfile",
+    "sounddevice",
     "soxr",
     "sqlalchemy",
     "sympy",
@@ -154,7 +155,7 @@ dependencies = [
     "torch-pitch-shift",
     "torchmetrics",
     "tqdm",
-    ""transformers==4.57.5",
+    "transformers",
     "typeguard",
     "typer",
     "typing-extensions",
@@ -162,7 +163,7 @@ dependencies = [
     "urllib3",
     "werkzeug",
     "openai-whisper",
-    "whisperx",
+    "whisperx==3.8.6",
     "win32-setctime",
     "yarl",
 ]

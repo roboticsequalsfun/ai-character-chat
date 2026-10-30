@@ -1,5 +1,7 @@
 from pathlib import Path
 
+"""Main project paths"""
+
 PROJECT_DIR = Path(__file__).resolve().parents[3]
 
 DATA_DIR = PROJECT_DIR / "data"
@@ -7,8 +9,7 @@ PROCESSED_DIR = DATA_DIR / "processed"
 INPUT_AUDIO_DIR = DATA_DIR / "raw" / "audio"
 OUTPUT_AUDIO_DIR = DATA_DIR / "output" / "audio"
 
-DATASET_DIR = DATA_DIR / "dataset"
-DATASET_WAV_DIR = DATASET_DIR / "wavs"
+DATASET_DIR = DATA_DIR / "datasets"
 
 TRANSCRIPT_DIR = PROCESSED_DIR / "transcripts"
 SEPARATED_DIR = PROCESSED_DIR / "separated"

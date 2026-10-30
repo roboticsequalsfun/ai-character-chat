@@ -1,13 +1,13 @@
 {
-    "run_name": "trump_voice",
-    "project_name": "trump_training",
+    "run_name": "character_voice",
+    "project_name": "character_training",
     "run_description":
         "GPT XTTS training",   
     "dataset": {
         "formatter": "ljspeech",
-        "dataset_name": "trump",
-        "speaker": 0,
-        "meta_file_train": "speaker_0.csv",
+        "dataset_name": "character",
+        "speaker": 1,
+        "meta_file_train": "speaker_1.csv",
         "language": "en"
     },
     "epochs": 40,
@@ -43,7 +43,13 @@
     "lr_scheduler": "MultiStepLR",
     "test_sentences": [
         "It took me quite a long time to develop a voice, and now that I have it I'm not going to be silent.",
-        "This cake is great. It's so delicious and moist."
+        "This cake is great. It's so delicious and moist.",
+        "The quick brown fox jumped over the lazy dog",
+        "I'm sorry Dave. I'm afraid I can't do that.",
+        "Toto, I've got a feeling we're not in Kansas anymore.",
+        "May the Force be with you.",
+        "To infinity and beyond!",
+        "So much time and so little to do. Wait. Scratch that, reverse it."
     ],
     "model_args": {    
         "max_conditioning_length": 132300,
@@ -56,5 +62,10 @@
         "gpt_stop_audio_token": 1025,
         "gpt_use_masking_gt_prompt_approach": true,
         "gpt_use_perceiver_resampler": true
+    },
+    "audio": {
+        "sample_rate": 22050,
+        "dvae_sample_rate": 22050,
+        "output_sample_rate": 24000
     }
 }

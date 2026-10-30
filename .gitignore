@@ -1,25 +1,22 @@
 # Virtual environment
 venv/
-tts-venv/
 
-# Dev artifacts
+# Dev stuff
 character_tts.bat
 character_chat.bat
+*.bak
 
 # IDE files
 *.code-workspace
 .vscode/
 
 # External data
-models/*
+models/tts/*
+models/llm/*
 configs/characters/*
-configs/prompts/*
-!models/.gitkeep
+configs/prompts/characters/*
 *.gguf
-external/*
-!external/.gitkeep
 data/*
-!data/.gitkeep
 
 # Python cache
 __pycache__/
@@ -28,5 +25,3 @@ __pycache__/
 
 # Build/package metadata
 *.egg-info/
-uv.lock
-*.bak
