@@ -1,22 +1,48 @@
 # Virtual environment
 venv/
 
-# Dev stuff
-character_tts.bat
-character_chat.bat
-*.bak
-
 # IDE files
 *.code-workspace
 .vscode/
 
 # External data
 models/tts/*
+!models/tts/.gitkeep
+
 models/llm/*
+!models/llm/.gitkeep
+
 configs/characters/*
+!configs/characters/.gitkeep
+
 configs/prompts/characters/*
-*.gguf
-data/*
+!configs/prompts/characters/.gitkeep
+
+# Internal data
+data/datasets/*
+!data/datasets/.gitkeep
+
+data/output/audio/*
+!data/output/audio/.gitkeep
+
+data/processed/chunks/*
+!data/processed/chunks/.gitkeep
+
+data/processed/separated/*
+!data/processed/separated/.gitkeep
+
+data/processed/transcripts/*
+!data/processed/transcripts/.gitkeep
+
+data/raw/audio/*
+!data/raw/audio/.gitkeep
+
+data/temp/runs/*
+!data/temp/runs/.gitkeep
+
+data/temp/speaker_chunks/*
+!data/temp/speaker_chunks/.gitkeep
+
 
 # Python cache
 __pycache__/
