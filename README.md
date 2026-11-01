@@ -66,17 +66,14 @@ What you need:
 2. Run `hf auth login` and follow the instructions to set up Hugging Face.
 3. Create an [access token](https://huggingface.co/settings/tokens).
 4. Add a new Environment Variable (on your PC) called `PYANNOTE_KEY` and add the name of your Token.
-5. Download a GGUF Llama model from [Hugging Face](https://huggingface.co).
+5. Download a GGUF Llama model from [Hugging Face](https://huggingface.co) to models/llm.
+6. Add the name of your model to `"model"` in `app.json` under `"llm"`
 
 ## Usage
 
-Provide code snippets or commands showing how to run or use the project:
+### Creating a character
 
-```bash
-python -m character_chat
-```
-
-Explain expected output or basic configuration parameters.
+Now that
 
 ## Roadmap
 
