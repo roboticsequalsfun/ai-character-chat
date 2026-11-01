@@ -247,6 +247,7 @@ Here's what I'd like to implement in the future:
 - [ ] Add CPU support
 - [ ] Add logging
 - [ ] Add Linux support
+- [ ] Support other languages
 - [ ] Make TTS training available as a standalone feature
 
 More features and improvements will be added as development continues!
