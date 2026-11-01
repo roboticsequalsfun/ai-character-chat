@@ -67,13 +67,21 @@ What you need:
 3. Create an [access token](https://huggingface.co/settings/tokens).
 4. Add a new Environment Variable (on your PC) called `PYANNOTE_KEY` and add the name of your Token.
 5. Download a GGUF Llama model from [Hugging Face](https://huggingface.co) to models/llm.
-6. Add the name of your model to `"model"` in `app.json` under `"llm"`
+6. Add the name of your model to `"model"` under `"llm"` in `configs/app.json`.
 
 ## Usage
 
 ### Creating a character
 
-Now that
+Now that your project is set up, it's time to create your character.
+
+There are 3 parts to a character:
+- The character.json (this is the most important par)
+- The character prompt
+- The voice model
+
+
+Due to the complexity of creating a character, instructions have been moved to [Project Wiki](https://github.com).
 
 ## Roadmap
 
@@ -81,7 +89,7 @@ Now that
 - [ ] Add logging
 - [ ] Add support for Linux
 - [ ] Make TTS training standalone as well
-- [ ] 
+
 ## Contributing
 
 Contributions are welcome! Please follow these steps:
