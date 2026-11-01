@@ -70,6 +70,7 @@ Before getting started, you'll need:
 - **NVIDIA GPU** (CPU support is planned for the future.)
 - **[uv](https://docs.astral.sh/uv/)** (version `0.13.x` or newer)
 - **[Hugging Face account](https://huggingface.co/join)**
+- **[FFmpeg](https://ffmpeg.org/)** (Required for audio processing through PyDub.)
 
 To install `uv`, run the following command in PowerShell:
 
@@ -136,6 +137,19 @@ Once the dependencies are installed, there are a few more things to configure.
 
 6. Open `configs/app.json` and set the `"model"` value under `"llm"` to the name of your downloaded model.
 
+### Installing FFmpeg
+
+AI Character Chat uses PyDub for audio processing, which requires FFmpeg.
+
+1. Download FFmpeg from the [official FFmpeg website](https://ffmpeg.org/download.html).
+2. Install FFmpeg for Windows.
+3. Add the FFmpeg `bin` directory to your Windows `PATH` environment variable.
+4. Open a new terminal and verify the installation:
+
+   ```powershell
+   ffmpeg -version
+
+See [[Getting started]] for more details on setup.
 You're now ready to go!
 
 ## Usage
