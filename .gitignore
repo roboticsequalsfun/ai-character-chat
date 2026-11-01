@@ -6,10 +6,10 @@ venv/
 .vscode/
 
 # External data
-models/tts/*
+models/tts/**
 !models/tts/.gitkeep
 
-models/llm/*
+models/llm/**
 !models/llm/.gitkeep
 
 configs/characters/*
@@ -25,6 +25,8 @@ data/datasets/*
 data/output/audio/*
 !data/output/audio/.gitkeep
 
+data/processed/**
+
 data/processed/chunks/*
 !data/processed/chunks/.gitkeep
 
@@ -36,6 +38,8 @@ data/processed/transcripts/*
 
 data/raw/audio/*
 !data/raw/audio/.gitkeep
+
+data/temp/**
 
 data/temp/runs/*
 !data/temp/runs/.gitkeep

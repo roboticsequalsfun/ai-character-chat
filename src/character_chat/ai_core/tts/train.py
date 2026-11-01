@@ -56,6 +56,10 @@ def download_files() -> None:
 
 def main() -> None:
     """Fine tune the model"""
+
+    log("===================================" , "INFO")
+    log("Training TTS Model...", "INFO") 
+    log("===================================\n", "INFO")
     
     # Download the neccesary files
     dvae_checkpoint, mel_norm_file, tokenizer_file, xtts_checkpoint = download_files()

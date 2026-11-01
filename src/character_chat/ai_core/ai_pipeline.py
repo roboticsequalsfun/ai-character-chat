@@ -7,7 +7,7 @@ from character_chat.ai_core.audio.player import play as play_audio
 from character_chat.ai_core.audio.recorder import AudioRecorder
 from character_chat.shared.logger import log
 from character_chat.shared.file_utils import load_config, load_json
-from character_chat.shared.paths import PROMPT_DIR, OUTPUT_AUDIO_DIR, INPUT_AUDIO_DIR, CONFIG_DIR, TTS_MODEL_DIR
+from character_chat.shared.paths import CHARACTER_DIR, PROMPT_DIR, OUTPUT_AUDIO_DIR, INPUT_AUDIO_DIR, CONFIG_DIR, TTS_MODEL_DIR, DATASET_DIR
 
 class AIPipeline:
     def __init__(self) -> None:
@@ -24,7 +24,9 @@ class AIPipeline:
     def run(self) -> None:
         """Run the loop"""
 
-        log("===================================" , "INFO")
+        text = input("Press Enter to continue start the interactive chat...")
+
+        log("\n===================================" , "INFO")
         log("Starting Interactive Character Chat...", "INFO") 
         log("===================================\n", "INFO")
 
@@ -45,7 +47,7 @@ class AIPipeline:
         character = load_json(CONFIG_DIR / f"characters" / f"{character_config}.json")
         character_name = character.get("name", "character")
     
-        character_prompt = (PROMPT_DIR / character.get("character_prompt", "prompts/character/character_prompt.txt")).read_text(encoding="utf-8")
+        character_prompt = (CHARACTER_DIR / character.get("character_prompt", "character.txt")).read_text(encoding="utf-8")
         system_prompt = (PROMPT_DIR / "system_prompt.txt").read_text(encoding="utf-8")
 
         prompt = character_prompt + "\n" + system_prompt
@@ -68,7 +70,8 @@ class AIPipeline:
             },
 
             "tts": {
-                "model": "trump_voice/trump_voice-October-14-2026_11+41AM-9ddd44b/best_model_2340.pth",
+                "model": character.get("voice_model", "xtts_speaker_0/best_model.pth"),
+                "dataset": character.get("training_dataset", "character"),
                 "temperature": config.get("tts", {}).get("temperature", 0.65),
                 "length_penalty": config.get("tts", {}).get("length_penalty", 1.0),
                 "repetition_penalty": config.get("tts", {}).get("repetition_penalty", 10.0),
@@ -122,6 +125,7 @@ class AIPipeline:
         self.stt = STT(model_size=self.config["stt"]["model_size"])
         self.tts = TTS(
             model_path=TTS_MODEL_DIR / self.config["tts"]["model"],
+            dataset=DATASET_DIR / self.config["tts"]["dataset"],
             temperature=self.config["tts"]["temperature"],
             length_penalty=self.config["tts"]["length_penalty"],
             repetition_penalty=self.config["tts"]["repetition_penalty"],

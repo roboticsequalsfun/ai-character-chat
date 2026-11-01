@@ -11,7 +11,8 @@ from character_chat.shared.logger import log
 
 
 class TTS:
-    def __init__(self, model_path: str | Path = None, temperature: int | float = 0.65,
+    def __init__(self, model_path: str | Path = TTS_MODEL_DIR / "xtts_speaker_0/best_model.pth", 
+            dataset: str | Path = TTS_MODEL_DIR / "character", temperature: int | float = 0.65,
             length_penalty: int | float= 1.0, repetition_penalty: int | float = 10.0,
             top_k: int | float = 50, top_p: int | float = 0.8, sample_rate: int = 44100) -> None:
         """Convert inputed text to speech using pretrained model from model_path"""
@@ -35,7 +36,7 @@ class TTS:
 
         # Get the path to the reference audio
         dataset_config = load_config("tts_training")
-        dataset_path = DATASET_DIR / "wavs" / f"speaker_{dataset_config.get('dataset', {}).get('speaker')}"
+        dataset_path = DATASET_DIR / dataset / "wavs" / f"speaker_{dataset_config.get('dataset', {}).get('speaker')}"
         
         # Catch invalid paths
         path_exists(config_path)
@@ -114,8 +115,15 @@ def main() -> None:
     parser.add_argument(
         "--output_path",
         type=str,
-        help="Path to save the generated audio file",
+        help="Path to save the generated audio file relative to the model dir",
         default=str(OUTPUT_AUDIO_DIR / "output.wav")
+    )
+
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        help="Name of the dataset the model was trained on",
+        default=str(TTS_MODEL_DIR / "character")
     )
 
     # And the model path

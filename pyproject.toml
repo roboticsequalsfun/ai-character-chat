@@ -108,7 +108,7 @@ dependencies = [
     "pandas",
     "pedalboard",
     "pillow",
-    "pick"
+    "pick",
     "platformdirs",
     "pooch",
     "primepy",

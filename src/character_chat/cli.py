@@ -10,20 +10,6 @@ import warnings
 from pick import pick
 
 def main():
-    # ---- 1. Create virtual environment ----
-    venv_path = Path("./.venv")
-
-    # Check if the folder exists and is a valid virtual environment
-    if not (venv_path / "pyvenv.cfg").exists():
-        log("Setting up environment...", "INFO")
-        subprocess.run(["uv", "venv"])
-
-        # ---- 2. Install package in editable mode ----
-        subprocess.run(["uv", "pip", "install", "-e", "."])
-
-        log("Environment set up! Please run .venv/Scripts/activate in your terminal and rerun the script.", "INFO")
-        sys.exit
-
     title = "What would you like to do?: "
     options = ["Run the interactive character chat", "Prepare the dataset for TTS training", "Train the TTS model", "Exit"]
 

@@ -134,7 +134,7 @@ def list_files_in_directory(directory: str | Path) -> list:
     if not directory.is_dir():
         log(f"{directory} is not a valid directory.", "ERROR")
     # Get all files
-    files = natsorted([f.name for f in directory.iterdir() if f.is_file() and f.name() != ".gitkeep"])
+    files = natsorted([f.name for f in directory.iterdir() if f.is_file() and f.name != ".gitkeep"])
     if files is None:
         log(f"No files found in {directory}", "WARNING")
     return files

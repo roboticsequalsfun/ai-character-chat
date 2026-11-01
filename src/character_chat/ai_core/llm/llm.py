@@ -1,6 +1,6 @@
 from llama_cpp import Llama
 import re
-from character_chat.shared.paths import LLM_MODELS_DIR, PROMPT_DIR, CONFIG_DIR
+from character_chat.shared.paths import LLM_MODELS_DIR, PROMPT_DIR, CONFIG_DIR, CHARACTER_DIR
 from character_chat.shared.file_utils import load_config, load_json, load_file
 from character_chat.shared.logger import log
 from typing import TypedDict
@@ -113,7 +113,7 @@ def configure_testing() -> Config:
     character = load_json(CONFIG_DIR / f"characters" / f"{config.get("active_character", "character")}.json")
 
     # Find the prompts specified in the character json
-    character_prompt = (PROMPT_DIR / character.get("character_prompt", "prompts/character/character_prompt.txt")).read_text(encoding="utf-8")
+    character_prompt = (CHARACTER_DIR / character.get("character_prompt", "character.txt")).read_text(encoding="utf-8")
     system_prompt = (PROMPT_DIR / "system_prompt.txt").read_text(encoding="utf-8")
     prompt = character_prompt + "\n" + system_prompt  # Combine them all as one
     
