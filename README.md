@@ -35,12 +35,13 @@ Follow these instructions to set up the project locally on your machine.
 
 What you need:
 * `uv >= 0.13.X`
+  
+  ```ps1
+  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+  ```
 * [HuggingFace Account](https://huggingface.co/login)
 * An NVIDIA GPU (Plan to support CPU only)
-
-How to install uv:
-  - Open Windows Powershell
-  - Run `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+* Windows 10/11
 
 ### Installation
 
@@ -57,14 +58,15 @@ How to install uv:
    uv sync
    ```
 4. Install PyTorch with CUDA:
-  ```
-  pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-  ```
+   ```bash
+   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+   ```
 
 ### Set up
 1. Run `.venv\Scripts\activate`
 2. Run `hf auth login` and follow the instructions to set up Hugging Face
-3. 
+3. Create an [access token](https://huggingface.co/settings/tokens)
+4. Add a new Environment Variable (on your PC) called `PYANNOTE_KEY` and add the name of your Token
 
 ## Usage
 
