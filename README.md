@@ -17,7 +17,6 @@ Currently it is in the "Works on my computer" phase. Expect many bugs.
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
-- [Support & Contact](#support--contact)
 
 ## About The Project
 
@@ -79,17 +78,13 @@ python -m character_chat
 
 Explain expected output or basic configuration parameters.
 
----
-
 ## Roadmap
 
 - [ ] Add support for CPU
 - [ ] Add logging
 - [ ] Add support for Linux
 - [ ] Make TTS training standalone as well
-
----
-
+- [ ] 
 ## Contributing
 
 Contributions are welcome! Please follow these steps:
@@ -100,15 +95,7 @@ Contributions are welcome! Please follow these steps:
 4. Push to the Branch (`gitosh origin feature/AmazingFeature`)
 5. Open a Pull Request
 
----
-
 ## License
 
 Distributed under the GNU License. See [LICENSE](LICENSE) for more information.
-
----
-
-## Support & Contact
-
-* **Issues:** [GitHub Issues](https://github.com)
 
