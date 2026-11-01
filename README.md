@@ -80,8 +80,7 @@ There are 3 parts to a character:
 - The character prompt
 - The voice model
 
-
-Due to the complexity of creating a character, instructions have been moved to [Project Wiki](https://github.com).
+[Creating a character](https://github.com/roboticsequalsfun/ai-character-chat/wiki/Creating-a-character).
 
 ## Roadmap
 
