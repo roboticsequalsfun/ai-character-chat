@@ -150,6 +150,20 @@ Each character consists of three main components:
 - **Character Prompt:** Defines the character's personality, behavior, and how it interacts with users.
 - **Voice Model:** Gives your character a voice.
 
+#### Setting Up Your Character
+
+1. Navigate to `configs/characters/`.
+2. Find `template.json` and make a copy of it.
+3. Rename the copied file to your character's name (e.g., `my_character.json`).
+4. Open the newly created JSON file and configure the following parameters:
+
+   - **`name`:** The name of your character.
+   - **`character_prompt`:** The filename of your character's prompt `.txt` file.
+   - **`voice_model`:** The path to your trained `best_model.pth` file.
+   - **`training_dataset`:** The name of the dataset used to train your character's voice model.
+
+Once you've configured everything, save the JSON file. Your character should now be ready to use!
+
 For a more detailed guide, check out the [Creating a Character Wiki](https://github.com/roboticsequalsfun/ai-character-chat/wiki/Creating-a-character).
 
 ### Running the Project
