@@ -6,8 +6,6 @@ This is a fully open source and free alternative to character.ai, and comes with
 
 Currently it is in the "Works on my computer" phase. Expect many bugs.
 
----
-
 ## Table of Contents
 
 - [About The Project](#about-the-project)
@@ -21,20 +19,13 @@ Currently it is in the "Works on my computer" phase. Expect many bugs.
 - [License](#license)
 - [Support & Contact](#support--contact)
 
----
-
 ## About The Project
 
 Provide a brief overview of the problem this project solves and its key features. Add a screenshot, GIF, or CLI output preview here if applicable:
 
-![Product Screenshot](https://placeholder.com)
-
 ## Built With
 
-* [Node.js](https://nodejs.org)
-* [TypeScript](https://typescriptlang.org)
-
----
+* [Python](https://www.python.org/)
 
 ## Getting Started
 
@@ -42,36 +33,45 @@ Follow these instructions to set up the project locally on your machine.
 
 ### Prerequisites
 
-List any software or dependencies required before installation (e.g., Node.js v18+, Git):
-* `npm >= 9.x`
+What you need:
+* `uv >= 0.13.X`
+* [HuggingFace Account](https://huggingface.co/login)
+* An NVIDIA GPU (Plan to support CPU only)
+
+How to install uv:
+  - Open Windows Powershell
+  - Run `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com
+   git clone https://github.com/roboticsequalsfun/ai-character-chat
    ```
 2. Navigate into the project directory:
    ```bash
-   cd your-project-name
+   cd ai-character-chat
    ```
-3. Install dependencies:
+3. Set up the environment:
    ```bash
-   npm install
+   uv sync
    ```
-4. Configure environment variables:
-   ```bash
-   cp .env.example .env
-   ```
+4. Install PyTorch with CUDA:
+  ```
+  pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+  ```
 
----
+### Set up
+1. Run `.venv\Scripts\activate`
+2. Run `hf auth login` and follow the instructions to set up Hugging Face
+3. 
 
 ## Usage
 
 Provide code snippets or commands showing how to run or use the project:
 
 ```bash
-npm run dev
+python -m character_chat
 ```
 
 Explain expected output or basic configuration parameters.
