@@ -14,6 +14,7 @@ Currently, it's in the **"Works on my computer"** phase. Expect bugs. Lots of th
 ## Table of Contents
 
 - [About The Project](#about-the-project)
+- [Notice](#notice)
 - [Built With](#built-with)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
