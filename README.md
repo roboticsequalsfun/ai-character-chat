@@ -149,7 +149,7 @@ AI Character Chat uses PyDub for audio processing, which requires FFmpeg.
    ```powershell
    ffmpeg -version
 
-See [[Getting started]] for more details on setup.
+See [Getting started](https://github.com/roboticsequalsfun/ai-character-chat/wiki/Getting-started) for more details on setup.
 You're now ready to go!
 
 ## Usage
