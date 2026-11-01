@@ -21,7 +21,7 @@ Currently it is in the "Works on my computer" phase. Expect many bugs.
 
 ## About The Project
 
-Provide a brief overview of the problem this project solves and its key features. Add a screenshot, GIF, or CLI output preview here if applicable:
+This is a free and opensource alternative to character.ai. It also comes with a built in Coqui-TTS LJSpeech dataset builder, and trainer.
 
 ## Built With
 
@@ -40,7 +40,7 @@ What you need:
   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
   ```
 * [HuggingFace Account](https://huggingface.co/login)
-* An NVIDIA GPU (Plan to support CPU only)
+* An NVIDIA GPU (Plan to support CPU to)
 * Windows 10/11
 
 ### Installation
@@ -63,10 +63,11 @@ What you need:
    ```
 
 ### Set up
-1. Run `.venv\Scripts\activate`
-2. Run `hf auth login` and follow the instructions to set up Hugging Face
-3. Create an [access token](https://huggingface.co/settings/tokens)
-4. Add a new Environment Variable (on your PC) called `PYANNOTE_KEY` and add the name of your Token
+1. Run `.venv\Scripts\activate`.
+2. Run `hf auth login` and follow the instructions to set up Hugging Face.
+3. Create an [access token](https://huggingface.co/settings/tokens).
+4. Add a new Environment Variable (on your PC) called `PYANNOTE_KEY` and add the name of your Token.
+5. Download a GGUF Llama model from [Hugging Face](https://huggingface.co).
 
 ## Usage
 
@@ -82,10 +83,10 @@ Explain expected output or basic configuration parameters.
 
 ## Roadmap
 
-- [x] Initial project setup
-- [ ] Add core feature X
-- [ ] Write unit tests
-- [ ] Release v1.0.0
+- [ ] Add support for CPU
+- [ ] Add logging
+- [ ] Add support for Linux
+- [ ] Make TTS training standalone as well
 
 ---
 
@@ -103,12 +104,11 @@ Contributions are welcome! Please follow these steps:
 
 ## License
 
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+Distributed under the GNU License. See [LICENSE](LICENSE) for more information.
 
 ---
 
 ## Support & Contact
 
 * **Issues:** [GitHub Issues](https://github.com)
-* **Email:** your.email@example.com
 
