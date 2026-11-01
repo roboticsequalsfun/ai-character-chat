@@ -6,9 +6,6 @@ This is a fully open source and free alternative to character.ai, and comes with
 
 Currently it is in the "Works on my computer" phase. Expect many bugs.
 
-[![License: MIT](https://shields.io)](https://opensource.org)
-[![Build Status](https://shields.io)]()
-
 ---
 
 ## Table of Contents
