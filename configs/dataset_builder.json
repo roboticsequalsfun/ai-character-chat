@@ -1,5 +1,6 @@
 {
   "name": "character",
+  "audio_file": "input.wav",
   "cache_run": true,
   "clean_audio": true,
 
@@ -8,7 +9,6 @@
     "min_chunk_duration": 5.0,
     "ideal_chunk_duration": 7.0,
     "min_silence_duration": 0.01,
-    "padding": 0,
     "weights": {
       "max": 0.5,
       "min": 0.5,
@@ -21,7 +21,6 @@
     "device": "cuda",
     "batch_size": 8,
     "compute_type": "float16",
-    "audio_file": "Trump_WEF_2018.wav",
     "target_level": -20.0
   }
 }

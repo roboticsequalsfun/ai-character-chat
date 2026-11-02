@@ -20,7 +20,7 @@ def main() -> None:
     dataset_name = config.get("name", "character")
     cache = config.get("cache_run", True)
 
-    input_file = INPUT_AUDIO_DIR / config.get("diarization", {}).get("audio_file", "input_audio.wav")  # Must include extension
+    input_file = INPUT_AUDIO_DIR / config.get("audio_file", "input_audio.wav")  # Must include extension
     device = config.get("diarization", {}).get("device", "cuda")
     batch_size = config.get("diarization", {}).get("batch_size", 16)  # Bigger can overflow or run out of VRAM memory
     compute_type = config.get("diarization", {}).get("compute_type", "float16")
