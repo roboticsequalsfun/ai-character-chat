@@ -59,6 +59,8 @@ The developers of this project are not responsible for misuse of the software. B
 - [Hugging Face](https://huggingface.co/)
 - [DeepFilterNet3](https://github.com/rikorose/deepfilternet)
 - [Pydub](https://github.com/jiaaro/pydub)
+- [Whisper](https://github.com/openai/whisper)
+- [Whisperx](https://github.com/m-bain/whisperx)
 
 ## Getting Started
 
