@@ -57,6 +57,8 @@ The developers of this project are not responsible for misuse of the software. B
 - [Coqui AI TTS](https://github.com/idiap/coqui-ai-TTS)
 - [llama-cpp-python](https://github.com/abetlen/llama-cpp-python)
 - [Hugging Face](https://huggingface.co/)
+- [DeepFilterNet3](https://github.com/rikorose/deepfilternet)
+- [Pydub](https://github.com/jiaaro/pydub)
 
 ## Getting Started
 
